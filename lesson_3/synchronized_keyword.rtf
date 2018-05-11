@@ -1,0 +1,89 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 Monaco;}
+{\colortbl;\red255\green255\blue255;\red127\green0\blue85;\red0\green0\blue192;\red106\green62\blue62;
+\red63\green127\blue95;\red127\green159\blue191;\red42\green0\blue255;}
+{\*\expandedcolortbl;;\csgenericrgb\c49804\c0\c33333;\csgenericrgb\c0\c0\c75294;\csgenericrgb\c41569\c24314\c24314;
+\csgenericrgb\c24706\c49804\c37255;\csgenericrgb\c49804\c62353\c74902;\csgenericrgb\c16471\c0\c100000;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\b\fs24 \cf0 The Synchronization keyword\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0\fs22 \cf2 public\cf0  \cf2 class\cf0  App \{\
+	\
+	\cf2 private\cf0  \cf2 int\cf0  \cf3 count\cf0  = 0;\
+	\
+	\cf2 public\cf0  \cf2 static\cf0  \cf2 void\cf0  main(String[] \cf4 args\cf0 ) \{\
+		App \cf4 app\cf0  = \cf2 new\cf0  App();\
+		\cf4 app\cf0 .doWork();\
+	\}\
+	\
+	\cf2 public\cf0  \cf2 void\cf0  doWork() \{\
+		Thread \cf4 t1\cf0  = \cf2 new\cf0  Thread(\cf2 new\cf0  Runnable() \{\
+			\cf2 public\cf0  \cf2 void\cf0  run() \{\
+				\cf2 for\cf0 (\cf2 int\cf0  \cf4 i\cf0 =0; \cf4 i\cf0  < 10000; \cf4 i\cf0 ++) \{\
+					\cf3 count\cf0 ++;\
+				\}\
+			\}\
+		\});\
+		\
+		Thread \cf4 t2\cf0  = \cf2 new\cf0  Thread(\cf2 new\cf0  Runnable() \{\
+			\cf2 public\cf0  \cf2 void\cf0  run() \{\
+				\cf2 for\cf0 (\cf2 int\cf0  \cf4 i\cf0 =0; \cf4 i\cf0  < 10000; \cf4 i\cf0 ++) \{\
+					\cf3 count\cf0 ++;\
+				\}\
+			\}\
+		\});\
+		\
+		\cf4 t1\cf0 .start();\
+		\cf4 t2\cf0 .start();\
+		\
+		\cf2 try\cf0  \{\
+			\cf4 t1\cf0 .join();\
+			\cf4 t2\cf0 .join();\
+\
+		\} \cf2 catch\cf0  (InterruptedException \cf4 e\cf0 ) \{\
+			\cf5 // \cf6 TODO\cf5  Auto-generated catch block\cf0 \
+			\cf4 e\cf0 .printStackTrace();\
+		\}\
+		\
+		System.\cf3 out\cf0 .println(\cf7 "Count is: "\cf0  + \cf3 count\cf0 );\
+	\}\
+\}\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\b\fs24 \cf0 The above code:\
+\
+
+\b0 Above, an App is created that calls doWork(). This method creates two threads within it which count to 10000.\
+\
+Without .join called on either thread, the system may print out before either of the counting methods in each thread have finished counting, due to being called immediately after .start() in the main thread.\
+\
+We need to wait until both threads have finished their process before displaying the value of count.\
+\
+Another problem is that both threads are reading from and writing to the count variable, possibly at different speeds and times, meaning they can undermine each other or end up skipping incrementation of count.\
+\
+
+\b Solution:\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\b0\fs22 \cf2 public\cf0  \cf2 synchronized\cf0  \cf2 void\cf0  increment() \{\
+		\cf3 count\cf0 ++;\
+	\}\
+	
+\f0\fs24 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 \
+Adding this method at the top and editing the loops so that they use this, instead of incrementing directly, means that both threads are incrementing count by calling a method that implements the synchronised keyword.\
+\
+
+\b Intrinsic lock:\
+\
+
+\b0 Every object in Java has an intrinsic lock.\
+\
+When you call a synchronised method, Java must acquire the intrinsic log before it can be called. Only one thread can acquire the intrinsic lock at a time, meaning the other thread has to wait its turn if its calling the same method, until the first thread releases the intrinsic lock by completing execution of that method.}
